@@ -1,0 +1,224 @@
+import { useState } from "react";
+import { CgClose } from "react-icons/cg";
+import { FaBars } from "react-icons/fa";
+import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
+import { Link, useLocation } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
+
+const navigationLinks = [
+  { title: "Home", link: "/" },
+  { title: "About Us", link: "/about-us-more-information" },
+  {
+    title: "Resources",
+    subLinks: [
+      { title: "A Level", link: "/resources/a-level" },
+      { title: "O Level", link: "/resources/o-level" },
+    ],
+  },
+  { title: "Course", link: "/course-details" },
+  {
+    title: "Past Papers",
+    subLinks: [
+      { title: "A Level", link: "/past-paper/a-level" },
+      { title: "O Level", link: "/past-paper/o-level" },
+    ],
+  },
+  { title: "Contact", link: "/contact-us" },
+];
+
+const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeSubMenu, setActiveSubMenu] = useState(null);
+  const [desktopSubMenu, setDesktopSubMenu] = useState(null);
+  const location = useLocation();
+  const { user, logOut } = useAuth();
+
+  const handleMobileMenuClick = () => {
+    setIsOpen(false);
+    setActiveSubMenu(null);
+  };
+
+  const toggleSubMenu = (index) => {
+    setActiveSubMenu(activeSubMenu === index ? null : index);
+  };
+
+  return (
+    <div className="fixed top-0 left-0 w-full bg-white shadow z-50 px-2">
+      <div className="max-w-7xl mx-auto h-16 flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-900 to-green-500">
+          Mathematics
+        </h1>
+
+        {/* Desktop Menu */}
+        <div className="hidden md:flex gap-6 uppercase font-medium text-base">
+          {navigationLinks.map((item, index) => (
+            <div
+              key={index}
+              className="relative"
+              onMouseEnter={() => setDesktopSubMenu(index)}
+              onMouseLeave={() => setDesktopSubMenu(null)}
+            >
+              {item.subLinks ? (
+                <div className="flex items-center gap-1 cursor-pointer">
+                  <span
+                    className={`${
+                      location.pathname === item.link
+                        ? "bg-green-800 text-white font-bold px-4 py-2 rounded-md"
+                        : "text-black hover:text-green-800"
+                    }`}
+                  >
+                    {item.title}
+                  </span>
+                  <span className="text-xl font-bold select-none">+</span>
+                </div>
+              ) : (
+                <Link
+                  to={item.link}
+                  className={`${
+                    location.pathname === item.link
+                      ? "bg-green-800 text-white font-bold px-4 py-2 rounded-md"
+                      : "text-black hover:text-green-800"
+                  }`}
+                >
+                  {item.title}
+                </Link>
+              )}
+
+              {item.subLinks && desktopSubMenu === index && (
+                <div className="absolute left-0 top-full mt-0 bg-white shadow-md rounded-md z-50 min-w-[200px]">
+                  {item.subLinks.map((subItem) => (
+                    <Link
+                      key={subItem.title}
+                      to={subItem.link}
+                      className={`block px-4 py-2 text-sm hover:bg-gray-100 ${
+                        location.pathname === subItem.link
+                          ? "bg-green-800 text-white font-bold rounded-md"
+                          : "text-black"
+                      }`}
+                    >
+                      {subItem.title}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {user ? (
+            <span
+              onClick={logOut}
+              className="cursor-pointer text-red-600 hover:text-red-800"
+            >
+              LogOut
+            </span>
+          ) : (
+            <Link
+              to="/login"
+              className={`hover:text-green-900 ${
+                location.pathname === "/login" ? "text-green-900" : "text-black"
+              }`}
+            >
+              Login
+            </Link>
+          )}
+        </div>
+
+        {/* Mobile Menu Button */}
+        <FaBars
+          onClick={() => setIsOpen(true)}
+          size={24}
+          className="md:hidden text-black cursor-pointer"
+        />
+      </div>
+
+      {/* Mobile Sidebar */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 z-50 md:hidden">
+          <div className="absolute top-0 left-0 h-full max-w-sm w-full bg-white shadow-xl p-4 overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-900 to-green-500">
+                Mathematics
+              </h1>
+              <button onClick={() => setIsOpen(false)}>
+                <CgClose size={28} className="text-red-600" />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4 uppercase font-medium text-base">
+              {navigationLinks.map((item, index) => (
+                <div key={index} className="border-b pb-2">
+                  {item.subLinks ? (
+                    <div
+                      className="flex justify-between items-center cursor-pointer"
+                      onClick={() => toggleSubMenu(index)}
+                    >
+                      <span>{item.title}</span>
+                      {activeSubMenu === index ? (
+                        <IoMdArrowDropup size={22} />
+                      ) : (
+                        <IoMdArrowDropdown size={22} />
+                      )}
+                    </div>
+                  ) : (
+                    <Link
+                      to={item.link}
+                      onClick={handleMobileMenuClick}
+                      className={`inline-block hover:text-green-700 ${
+                        location.pathname === item.link
+                          ? "bg-green-800 text-white font-bold rounded-md px-4 py-1"
+                          : "text-black"
+                      }`}
+                    >
+                      {item.title}
+                    </Link>
+                  )}
+
+                  {item.subLinks && activeSubMenu === index && (
+                    <div className="pl-4 mt-2 space-y-1">
+                      {item.subLinks.map((subItem) => (
+                        <Link
+                          key={subItem.title}
+                          to={subItem.link}
+                          onClick={handleMobileMenuClick}
+                          className={`block text-sm border-t pt-2 ${
+                            location.pathname === subItem.link
+                              ? "bg-green-800 text-white font-bold rounded-md px-4 py-1"
+                              : "text-black"
+                          }`}
+                        >
+                          {subItem.title}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {user ? (
+                <span
+                  onClick={() => {
+                    logOut();
+                    setIsOpen(false);
+                  }}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  LogOut
+                </span>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={handleMobileMenuClick}
+                  className="text-center py-2 bg-green-800 text-white rounded-md font-semibold"
+                >
+                  Login
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Navbar;
